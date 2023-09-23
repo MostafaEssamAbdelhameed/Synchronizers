@@ -1,0 +1,67 @@
+`timescale 1ns / 1ps
+
+module BIT_SYNC_tb ();
+
+/////////////////////////////////////////////////////
+//////////////////clk_generator//////////////////////
+/////////////////////////////////////////////////////
+
+parameter clk_period= 20; 
+reg clk_tb=0; 
+always #(clk_period/2) clk_tb = ~clk_tb;
+
+/////////////////////////////////////////////////////
+///////////////Decleration & Instances///////////////
+/////////////////////////////////////////////////////
+
+reg   [7:0]	Unsync_bus_tb; 
+reg		    bus_enable_tb;
+reg	    	rst_tb;
+wire  [7:0]	sync_bus_tb; 
+wire		enable_pulse_tb;
+
+ DATA_SYNC DUT (
+		.Unsync_bus(Unsync_bus_tb),
+		.bus_enable(bus_enable_tb),
+		.clk(clk_tb),
+		.rst(rst_tb),
+		.sync_bus(sync_bus_tb),
+		.enable_pulse(enable_pulse_tb)
+		);
+
+
+/////////////////////////////////////////////////////
+///////////////////Initial Block/////////////////////
+/////////////////////////////////////////////////////
+
+initial begin 
+	$dumpfile("BIT_SYNC.vcd"); 
+	$dumpvars; 
+	
+	bus_enable_tb = 0; 
+
+	reset();
+		
+	bus_enable_tb = 1; 
+	Unsync_bus_tb = 8'b10101010;
+	
+	#(5*clk_period);
+	
+	bus_enable_tb = 0; 
+
+end 
+
+/////////////////////////////////////////////////////
+//////////////////////Tasks//////////////////////////
+/////////////////////////////////////////////////////
+
+task reset;
+ begin
+ rst_tb=1;
+ #(clk_period)
+ rst_tb=0;
+ #(clk_period)
+ rst_tb=1;
+ end
+endtask
+endmodule
